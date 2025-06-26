@@ -69,6 +69,7 @@ module.exports = {
       fontFamily: {
         sora: ['var(--font-sora)', ...fontFamily.sans],
         lufga: ['Lufga', 'sans-serif'],
+        'helvetica-now': ['Helvetica Now', 'sans-serif'],
         // 'lufga': ['var(--font-lufga)', ...fontFamily.sans],
       },
       borderRadius: {

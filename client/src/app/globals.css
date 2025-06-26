@@ -1,11 +1,14 @@
 @import "./font.css";
+@import "./helvetica-font.css";
 
 @import "tailwindcss";
 :root {
   --primary-button: #C4FC1E ;
 }
 @custom-variant dark (&:is(.dark *));
-
+@theme {
+--font-helvetica-now : 'Helvetica Now', 'sans-serif';
+}
 @theme {
   --breakpoint-sm: 130px;
   --breakpoint-md: 640px;

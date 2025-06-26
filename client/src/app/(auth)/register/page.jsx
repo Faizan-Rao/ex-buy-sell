@@ -16,7 +16,7 @@ import { OTPSend } from "@/components/register/otp-send";
 import { FormStepper } from "@/components/custom/form-stepper";
 
 export default function Register() {
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(3);
   return (
     <div className="flex flex-col  md:flex-row w-full max-w-[430px] md:max-w-1920 h-full min-h-screen  mx-auto">
         

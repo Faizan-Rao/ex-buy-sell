@@ -1,5 +1,6 @@
 import React from 'react'
-
+import Image from "next/image"
+import { OTPInputComponent } from '../custom/otp-input'
 const OtpVerification = () => {
   return (
       <div className="w-full md:w-1/2 flex flex-col p-6 md:p-10 lg:p-20">
@@ -15,7 +16,7 @@ const OtpVerification = () => {
           {/* Form Content */}
           <div className="mb-16">
             <h1 className="text-2xl font-bold text-center mb-2">OTP Verification</h1>
-            <p className="text-center text-gray-600 mb-8">
+            <p className="text-center text-[18px] text-gray-600 mb-8">
               Check your inbox. We sent a code to
               <br />
               example@gmail.com
@@ -23,14 +24,7 @@ const OtpVerification = () => {
 
             {/* OTP Input Fields */}
             <div className="flex justify-center gap-3 mb-8">
-              {[5, 3, "", ""].map((value, index) => (
-                <div
-                  key={index}
-                  className="w-16 h-16 border border-gray-300 rounded-md flex items-center justify-center text-2xl font-semibold"
-                >
-                  {value}
-                </div>
-              ))}
+              <OTPInputComponent/>
             </div>
 
             {/* Continue Button */}
@@ -42,13 +36,6 @@ const OtpVerification = () => {
             </p>
           </div>
 
-          {/* Progress Indicator */}
-          <div className="flex justify-center items-center space-x-2">
-            <div className="w-16 h-1 bg-gray-200 rounded-full"></div>
-            <div className="w-16 h-1 bg-gray-200 rounded-full"></div>
-            <div className="w-16 h-1 bg-blue-600 rounded-full"></div>
-            <div className="w-16 h-1 bg-gray-200 rounded-full"></div>
-          </div>
         </div>
       </div>
   )

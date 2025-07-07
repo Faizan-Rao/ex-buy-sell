@@ -132,7 +132,7 @@ export default function FilterSidebar({
             <Input
               // placeholder="Search"
               placeholder="Search"
-              className=" placeholder:text-white !text-white border-none focus:border-none ring-0 focus:outline-none focus:ring-0 shadow-none"
+              className=" placeholder:text-white bg-transparent !text-white border-none focus:border-none outline-0 ring-0 focus:outline-none focus:ring-0 shadow-none"
               value={filters.search}
               onChange={handleSearchChange}
             />

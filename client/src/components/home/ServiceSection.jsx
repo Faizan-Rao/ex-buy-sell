@@ -229,7 +229,7 @@ export default function ServiceSection() {
                   </div>
                   <span className="text-sm md:text-base font-medium text-black/50 font-lufga">Location: <span className="text-black">{listing.location}</span></span>
                 </div>
-                <div className="text-sm md:text-base font-medium text-black/50 font-lufga text-right">Business Age: <span className="text-black">{listing.businessAge}</span></div>
+                <div className="text-sm md:text-base font-medium text-black/50 font-lufga text-right">Business Age: <span className="text-black">{listing?.businessAge}</span></div>
 
                 <div className="text-sm md:text-base font-medium text-black/50 font-lufga">Net Profit: <span className="text-black">{listing.netProfit}</span></div>
                 <div className="text-sm md:text-base font-medium text-black/50 font-lufga text-right">Revenue: <span className="text-black">{listing.revenue}</span></div>

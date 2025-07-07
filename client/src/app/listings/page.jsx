@@ -19,6 +19,7 @@ import {
 import Image from "next/image";
 import { LISTING_NAV_PATH } from "@/config/navpath";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import {MenuSVG} from "@/svg";
 
 export default function AllListings() {
   const [filters, setFilters] = useState({
@@ -190,6 +191,7 @@ export default function AllListings() {
 
   return (
     <div className="flex min-h-screen sm:max-w-[430px] md:max-w-[1920px] w-full bg-black text-white">
+      
       {/* Desktop sidebar */}
       <div className="hidden md:block max-w-[389px] w-full border-r border-gray-800 overflow-y-auto">
         <FilterSidebar
@@ -198,7 +200,7 @@ export default function AllListings() {
           onClearFilters={handleClearFilters}
         />
       </div>
-
+    
       <div className="flex-1 overflow-y-auto">
         {/* Header */}
         <header className="sticky top-0 z-10 bg-black border-b min-w-[384px] border-gray-800 px-4 py-3 flex items-center ">
@@ -365,6 +367,9 @@ export default function AllListings() {
 
         {/* Main content */}
         <main className="flex flex-col p-4 md:p-6  bg-white">
+          {/* <MenuSVG  width={90} height={90} className={"bg-green-600 text-black  text-4xl stroke-2 hover:text-green-100"}/> */}
+          <MenuSVG className={"bg-green-600 text-black w-[100px] h-[140px] stroke-2 hover:text-green-100"}/>
+          {/* <ArrowSVG className={"bg-black   w-[140px] h-[140px] text-red-600 hover:text-green-100"}/> */}
           {/* Sell your store banner */}
           <div className="bg-[linear-gradient(to_right,_#C4FC1E,_#D2FF4D)] flex justify-between  text-black   mb-6 relative overflow-hidden sm:h-[210px] md:h-[260px] sm:p-[20px] md:p-[32px] rounded-[20px]">
             <div className="md:max-w-[60%] z-10 flex flex-col gap-[10px]">

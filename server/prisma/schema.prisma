@@ -1,0 +1,320 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+  MONITER
+}
+
+enum RevenueType {
+  monthly
+  yearly
+}
+
+enum AnswerType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  SELECT
+}
+
+enum ChatStatus {
+  ACTIVE
+  CLOSED
+  FLAGGED
+  ARCHIVED
+}
+
+model User {
+  id            String   @id @default(uuid()) @map("_id")
+  first_name    String
+  last_name     String
+  email         String
+  phone         String
+  country_code  String
+  address       String
+  country       String
+  permissions   String[]
+  role          Role
+  state         String
+  refresh_token String
+  password_hash String
+  otp_code      String
+  zip_code      String
+  background    String
+
+  chatsAsUser    ChatRoom[] @relation("UserChats")
+  chatsAsSeller  ChatRoom[] @relation("SellerChats")
+  monitoredChats ChatRoom[] @relation("MonitorChats")
+  messages       Message[]
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  deleted_at     DateTime?
+
+  financial        Financial[]
+  buiness_category BusinessCategory[]
+  niche            Niche[]
+  social_account   SocialAccount[]
+}
+
+model Financial {
+  id              String  @id @default(uuid()) @map("_id")
+  seller_location String?
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  age_range              Range? @relation("ageRange")
+  yearly_profit_range    Range? @relation("yearlyProfitRange")
+  profit_multiple_range  Range? @relation("profitMultipleRange")
+  revenue_multiple_range Range? @relation("revenueMultipleRange")
+}
+
+model Range {
+  id         String   @id @default(uuid()) @map("_id")
+  min        String
+  max        String
+  country    String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  age_id              String @unique
+  yearly_profit_id    String @unique
+  profit_multiple_id  String @unique
+  revenue_multiple_id String @unique
+
+  age              Financial? @relation("ageRange", fields: [age_id], references: [id])
+  yearly_profit    Financial? @relation("yearlyProfitRange", fields: [yearly_profit_id], references: [id])
+  profit_multiple  Financial? @relation("profitMultipleRange", fields: [profit_multiple_id], references: [id])
+  revenue_multiple Financial? @relation("revenueMultipleRange", fields: [revenue_multiple_id], references: [id])
+}
+
+model Statistic {
+  id                  String   @id @default(uuid()) @map("_id")
+  conversion_rate     String?
+  average_order_value String?
+  returning_customer  String?
+  email_subscribers   String[]
+  refund_rate         String
+  customer_base       String
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  sales_channel        Channel[] @relation("SalesChannel")
+  adverstising_channel Channel[] @relation("AdvertisingChannel")
+  sales_countries      Channel[] @relation("SalesCountries")
+}
+
+model Channel {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  percentage String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  salesChannelId        String?
+  adverstisingChannelId String?
+  salesCountriesId      String?
+
+  sales_channel        Statistic? @relation("SalesChannel", fields: [salesChannelId], references: [id])
+  adverstising_channel Statistic? @relation("AdvertisingChannel", fields: [adverstisingChannelId], references: [id])
+  sales_countries      Statistic? @relation("SalesCountries", fields: [salesCountriesId], references: [id])
+}
+
+model BusinessCategory {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
+}
+
+model BusinessCategoryOption {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Niche {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  userId String?
+  User   User?   @relation(fields: [userId], references: [id])
+}
+
+model NicheOption {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Plan {
+  id            String   @id @default(uuid()) @map("_id")
+  title         String
+  description   String
+  duration_type String
+  type          String
+  price         String
+  feature       String[]
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model EmailTemplate {
+  id         String   @id @default(uuid()) @map("_id")
+  subject    String
+  cc         String[]
+  body       String
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Category {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  image_path String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model ServiceTool {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  image_path String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Brand {
+  id                String   @id @default(uuid()) @map("_id")
+  name              String
+  domain            String
+  business_location String
+  image_path        String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+}
+
+model Revenue {
+  id             String      @id @default(uuid()) @map("_id")
+  type           RevenueType
+  revenue_amount String
+  annual_cost    String
+  net_profit     String?
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+}
+
+model Question {
+  id          String     @id @default(uuid()) @map("_id")
+  question    String
+  answer_type AnswerType
+  option      String[]
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+}
+
+model SocialAccount {
+  id         String   @id @default(uuid()) @map("_id")
+  userId     String
+  url        String
+  followers  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Advertisement {
+  id          String @id @default(uuid()) @map("_id")
+  price       String
+  title       String
+  intro       String
+  usp         String
+  description String
+
+  PhotoFile   File?  @relation("PhotoFile")
+  Attachments File[] @relation("Attachments")
+}
+
+model File {
+  id         String   @id @default(uuid()) @map("_id")
+  size       String
+  path       String
+  mime_type  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  photoId    String         @unique
+  fileId     String?
+  photo      Advertisement  @relation("PhotoFile", fields: [photoId], references: [id])
+  attachment Advertisement? @relation("Attachments", fields: [fileId], references: [id])
+}
+
+model Handover {
+  id              String   @id @default(uuid()) @map("_id")
+  handover_option String[]
+  is_sale_support Boolean
+  total_month     String
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
+model HandoverOption {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+// User Chat System
+model ChatRoom {
+  id        String     @id @default(uuid()) @map("_id")
+  user      User       @relation("UserChats", fields: [userId], references: [id])
+  userId    String
+  seller    User       @relation("SellerChats", fields: [sellerId], references: [id])
+  sellerId  String
+  monitor   User?      @relation("MonitorChats", fields: [monitorId], references: [id])
+  monitorId String? // optional
+  messages  Message[]
+  status    ChatStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Message {
+  id         String   @id @default(uuid()) @map("_id")
+  chat       ChatRoom @relation(fields: [chatId], references: [id])
+  chatId     String
+  sender     User     @relation(fields: [senderId], references: [id])
+  senderId   String
+  senderRole Role
+  content    String
+  timestamp  DateTime @default(now())
+  isEdited   Boolean  @default(false)
+  isDeleted  Boolean  @default(false)
+  flagged    Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}

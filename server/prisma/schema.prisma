@@ -57,7 +57,7 @@ model User {
   background        String?
   is_email_verified Boolean    @default(false)
   is_phone_verified Boolean    @default(false)
-  verifid           String
+  verified          Boolean    @default(false)
   chatsAsUser       ChatRoom[] @relation("UserChats")
   chatsAsSeller     ChatRoom[] @relation("SellerChats")
   monitoredChats    ChatRoom[] @relation("MonitorChats")
@@ -175,7 +175,7 @@ model Plan {
   title         String
   description   String
   duration_type String
-  type          String
+  type          String // Monthly or Yearly
   price         String
   feature       String[]
   created_at    DateTime @default(now())

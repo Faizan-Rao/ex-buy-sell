@@ -20,7 +20,7 @@ import { Roles } from 'common/decorator/roles.decorator';
 import { RolesGuard } from 'common/guard/role.guard';
 import { ApiBody, ApiParam } from '@nestjs/swagger';
 
-@Roles(['USER'])
+@Roles(['ADMIN', 'MONITER'])
 @UseGuards(RolesGuard)
 @Controller('user')
 export class UserController {
@@ -28,6 +28,7 @@ export class UserController {
 
   @Get('/')
   findAll() {
+    console.log('hello');
     return this.userService.findAll();
   }
 
@@ -43,6 +44,8 @@ export class UserController {
     return this.userService.createUser(body);
   }
 
+  @Roles(['ADMIN', 'MONITER', 'USER'])
+  @UseGuards(RolesGuard)
   @Patch(':id')
   @ApiBody({ type: () => UserUpdateSchemaDTO })
   @ApiParam({ name: 'id', description: 'User ID', type: String })

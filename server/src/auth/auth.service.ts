@@ -35,7 +35,7 @@ export class AuthService {
     const payload = {
       role: process.env.DEFAULT_ROLE,
       email,
-      passwordHash: hash,
+      password_hash: hash,
       first_name: body.first_name,
       last_name: body.last_name,
     };
@@ -123,7 +123,6 @@ export class AuthService {
 
     const { accessToken, refreshToken: newRefreshToken } =
       await this.getTokens(user);
-
     const hashed = await this.hashData(newRefreshToken);
     const newUser = await this.userService.updateUser(userId, {
       refresh_token: hashed,
@@ -154,8 +153,8 @@ export class AuthService {
   }
 
   formatResponse(data: any) {
-    delete data['passwordHash'];
-    if (data['refreshToken']) delete data['refreshToken'];
+    delete data['password_hash'];
+    if (data['refresh_token']) delete data['refresh_token'];
     return data;
   }
 

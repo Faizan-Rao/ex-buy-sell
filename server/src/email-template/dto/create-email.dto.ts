@@ -8,5 +8,5 @@ export const createEmailSchema = z.object({
   body: z.string().min(4),
 });
 
-export type CreateEmailDto = z.infer<typeof createEmailSchema>;
-export class CreateEmailType extends createZodDto(createEmailSchema) {}
+export type CreateEmailType = z.infer<typeof createEmailSchema>;
+export class CreateEmailDto extends createZodDto(createEmailSchema) {}

@@ -11,10 +11,14 @@ import {
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ZodValidationPipe } from 'common/validator/zod.validator';
-import { createCategorySchema } from './dto/create-category.dto';
+import {
+  CreateCategoryDto,
+  createCategorySchema,
+} from './dto/create-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from './config/multer.config';
 import { Roles } from 'common/decorator/roles.decorator';
+import { ApiBody, ApiParam } from '@nestjs/swagger';
 @Roles(['ADMIN', 'MONITER'])
 @Controller('category')
 export class CategoryController {
@@ -24,12 +28,12 @@ export class CategoryController {
   async getAll() {
     return await this.categoryService.getAll();
   }
-
+  @ApiParam({ name: 'id', description: 'Category ID', type: String })
   @Get(':id')
   async getById(@Param('id') id: string) {
     return await this.categoryService.getById(id);
   }
-
+  @ApiBody({ type: () => CreateCategoryDto })
   @UseInterceptors(FileInterceptor('image', multerConfig))
   @Post()
   async create(
@@ -43,6 +47,8 @@ export class CategoryController {
   }
 
   @UseInterceptors(FileInterceptor('image', multerConfig))
+  @ApiParam({ name: 'id', description: 'Category ID', type: String })
+  @ApiBody({ type: () => CreateCategoryDto })
   @Patch(':id')
   async update(
     @UploadedFile() file: Express.Multer.File,
@@ -56,6 +62,7 @@ export class CategoryController {
   }
 
   @Delete(':id')
+  @ApiParam({ name: 'id', description: 'Category ID', type: String })
   async delete(@Param() id: string) {
     return await this.categoryService.delete(id);
   }

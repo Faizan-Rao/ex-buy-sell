@@ -240,8 +240,8 @@ model Question {
 model SocialAccount {
   id         String   @id @default(uuid()) @map("_id")
   userId     String
-  url        String
-  followers  String
+  url        String?
+  followers  String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

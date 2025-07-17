@@ -12,7 +12,8 @@ import { RolesGuard } from 'common/guard/role.guard';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ServiceToolModule } from './service-tool/service-tool.module';
-import { SocialModule } from './social/social.module';
+import { NicheModule } from './niche/niche.module';
+import { ListingModule } from './listing/listing.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { SocialModule } from './social/social.module';
       serveRoot: '/uploads',
     }),
     ServiceToolModule,
-    SocialModule,
+    NicheModule,
+    ListingModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthGuard, RolesGuard],

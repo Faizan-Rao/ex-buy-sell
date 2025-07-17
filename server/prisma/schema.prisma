@@ -31,6 +31,17 @@ enum AnswerType {
   SELECT
 }
 
+enum TicketStatus {
+  OPEN
+  CLOSED
+  PENDING
+}
+
+enum ListingStatus {
+  PUBLISH
+  DRAFT
+}
+
 enum ChatStatus {
   ACTIVE
   CLOSED
@@ -39,7 +50,7 @@ enum ChatStatus {
 }
 
 model User {
-  id                String     @id @default(uuid()) @map("_id")
+  id                String          @id @default(uuid()) @map("_id")
   first_name        String?
   last_name         String?
   email             String
@@ -55,34 +66,57 @@ model User {
   otp_code          BigInt?
   zip_code          BigInt?
   background        String?
-  is_email_verified Boolean    @default(false)
-  is_phone_verified Boolean    @default(false)
-  verified          Boolean    @default(false)
-  chatsAsUser       ChatRoom[] @relation("UserChats")
-  chatsAsSeller     ChatRoom[] @relation("SellerChats")
-  monitoredChats    ChatRoom[] @relation("MonitorChats")
+  is_email_verified Boolean         @default(false)
+  support_ticket    SupportTicket[]
+  is_phone_verified Boolean         @default(false)
+  verified          Boolean         @default(false)
+  favourite         Favourite[]
+  chatsAsUser       ChatRoom[]      @relation("UserChats")
+  chatsAsSeller     ChatRoom[]      @relation("SellerChats")
+  monitoredChats    ChatRoom[]      @relation("MonitorChats")
   messages          Message[]
-  created_at        DateTime   @default(now())
-  updated_at        DateTime   @updatedAt
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
   deleted_at        DateTime?
 
-  financial        Financial[]
-  buiness_category BusinessCategory[]
+  listing     Listing[]
+  preferences Preference?
+}
+
+model Favourite {
+  id String @id @default(uuid()) @map("_id")
+
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId     String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Preference {
+  id String @id @default(uuid()) @map("_id")
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  businessCategory BusinessCategory[]
   niche            Niche[]
-  social_account   SocialAccount[]
+  financial        Financial?
 }
 
 model Financial {
   id              String  @id @default(uuid()) @map("_id")
   seller_location String?
 
-  userId String @map("user_id")
-  user   User   @relation(fields: [userId], references: [id])
-
   age_range              Range? @relation("ageRange")
   yearly_profit_range    Range? @relation("yearlyProfitRange")
   profit_multiple_range  Range? @relation("profitMultipleRange")
   revenue_multiple_range Range? @relation("revenueMultipleRange")
+
+  preferenceId String?     @unique
+  preference   Preference? @relation(fields: [preferenceId], references: [id])
 }
 
 model Range {
@@ -110,7 +144,9 @@ model Statistic {
   average_order_value String?
   returning_customer  String?
   email_subscribers   String[]
-  refund_rate         String
+  refund_rate         String[]
+  listingId           String?  @unique
+  listing             Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
   customer_base       String
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
@@ -131,9 +167,39 @@ model Channel {
   adverstisingChannelId String?
   salesCountriesId      String?
 
-  sales_channel        Statistic? @relation("SalesChannel", fields: [salesChannelId], references: [id])
-  adverstising_channel Statistic? @relation("AdvertisingChannel", fields: [adverstisingChannelId], references: [id])
-  sales_countries      Statistic? @relation("SalesCountries", fields: [salesCountriesId], references: [id])
+  sales_channel        Statistic? @relation("SalesChannel", fields: [salesChannelId], references: [id], onDelete: Cascade)
+  adverstising_channel Statistic? @relation("AdvertisingChannel", fields: [adverstisingChannelId], references: [id], onDelete: Cascade)
+  sales_countries      Statistic? @relation("SalesCountries", fields: [salesCountriesId], references: [id], onDelete: Cascade)
+}
+
+model Listing {
+  id                 String            @id @default(uuid()) @map("_id")
+  status             ListingStatus
+  user               User              @relation(fields: [userId], references: [id])
+  userId             String
+  brand              Brand?
+  category           ListingCategory[]
+  tools              ListingTool[]
+  financials         Revenue[]
+  statistics         Statistic?
+  productQuestion    ListingQuestion[] @relation("ProductQuestion")
+  managementQuestion ListingQuestion[] @relation("ManageQuestion")
+  social_account     SocialAccount[]
+  advertisement      Advertisement?
+  handover           Handover?
+  Favourite          Favourite[]
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+  deleted_at         DateTime?
+}
+
+model ListingCategory {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
 }
 
 model BusinessCategory {
@@ -142,8 +208,8 @@ model BusinessCategory {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  Preference   Preference? @relation(fields: [preferenceId], references: [id])
+  preferenceId String?
 }
 
 model BusinessCategoryOption {
@@ -154,13 +220,14 @@ model BusinessCategoryOption {
 }
 
 model Niche {
-  id         String   @id @default(uuid()) @map("_id")
+  id String @id @default(uuid()) @map("_id")
+
   name       String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  userId String?
-  User   User?   @relation(fields: [userId], references: [id])
+  Preference   Preference? @relation(fields: [preferenceId], references: [id])
+  preferenceId String?
 }
 
 model NicheOption {
@@ -208,24 +275,53 @@ model ServiceTool {
   updated_at DateTime @updatedAt
 }
 
+model ListingTool {
+  id         String   @id @default(uuid()) @map("_id")
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  Listing    Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId  String?
+}
+
 model Brand {
   id                String   @id @default(uuid()) @map("_id")
   name              String
-  domain            String
+  domain            String[]
   business_location String
-  image_path        String?
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
+  listingId         String?  @unique
+  listing           Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
 }
 
 model Revenue {
   id             String      @id @default(uuid()) @map("_id")
   type           RevenueType
+  name           String
   revenue_amount String
   annual_cost    String
   net_profit     String?
+  listingId      String
+  listing        Listing?    @relation(fields: [listingId], references: [id], onDelete: Cascade)
   created_at     DateTime    @default(now())
   updated_at     DateTime    @updatedAt
+}
+
+model ListingQuestion {
+  id          String      @id @default(uuid()) @map("_id")
+  question    String?
+  answer_for  String?
+  answer_type AnswerType?
+  answer      String?
+  option      String[]
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+
+  productQuestion      Listing? @relation("ProductQuestion", fields: [productQuestionId], references: [id], onDelete: Cascade)
+  productQuestionId    String?
+  managementQuestion   Listing? @relation("ManageQuestion", fields: [managementQuestionId], references: [id], onDelete: Cascade)
+  managementQuestionId String?
 }
 
 model Question {
@@ -245,19 +341,21 @@ model SocialAccount {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  Listing   Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String?
 }
 
 model Advertisement {
-  id          String @id @default(uuid()) @map("_id")
+  id          String   @id @default(uuid()) @map("_id")
   price       String
   title       String
   intro       String
   usp         String
   description String
-
-  PhotoFile   File?  @relation("PhotoFile")
-  Attachments File[] @relation("Attachments")
+  listingId   String?  @unique
+  PhotoFile   File?    @relation("PhotoFile")
+  Attachments File[]   @relation("Attachments")
+  listing     Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
 }
 
 model File {
@@ -277,10 +375,13 @@ model File {
 model Handover {
   id              String   @id @default(uuid()) @map("_id")
   handover_option String[]
-  is_sale_support Boolean
-  total_month     String
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  is_sale_support String
+  listingId       String?  @unique
+  listing         Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  total_month String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 }
 
 model HandoverOption {
@@ -292,17 +393,18 @@ model HandoverOption {
 
 // User Chat System
 model ChatRoom {
-  id        String     @id @default(uuid()) @map("_id")
-  user      User       @relation("UserChats", fields: [userId], references: [id])
-  userId    String
-  seller    User       @relation("SellerChats", fields: [sellerId], references: [id])
-  sellerId  String
-  monitor   User?      @relation("MonitorChats", fields: [monitorId], references: [id])
-  monitorId String? // optional
-  messages  Message[]
-  status    ChatStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id            String          @id @default(uuid()) @map("_id")
+  user          User            @relation("UserChats", fields: [userId], references: [id])
+  userId        String
+  seller        User            @relation("SellerChats", fields: [sellerId], references: [id])
+  sellerId      String
+  monitor       User?           @relation("MonitorChats", fields: [monitorId], references: [id])
+  monitorId     String? // optional
+  messages      Message[]
+  SupportTicket SupportTicket[]
+  status        ChatStatus      @default(ACTIVE)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 model Message {
@@ -319,4 +421,29 @@ model Message {
   flagged    Boolean  @default(false)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model SupportTicket {
+  id         String       @id @default(uuid()) @map("_id")
+  userId     String
+  chatRoomId String?
+  subject    String
+  message    String
+  status     TicketStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+
+  user     User         @relation(fields: [userId], references: [id])
+  chatRoom ChatRoom?    @relation(fields: [chatRoomId], references: [id])
+  files    TicketFile[]
+}
+
+model TicketFile {
+  id              String         @id @default(uuid()) @map("_id")
+  name            String
+  path            String
+  urls            String[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  SupportTicket   SupportTicket? @relation(fields: [supportTicketId], references: [id])
+  supportTicketId String?
 }
